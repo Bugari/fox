@@ -1,5 +1,4 @@
 module.exports = (grunt) ->
-  fs = require 'fs'
 
   grunt.initConfig
     notify:
@@ -41,6 +40,8 @@ module.exports = (grunt) ->
         expand: true
         cwd: 'src'
         src: '**/*.coffee'
+    nodeunit:
+      all: ['test/**/*_test.coffee']
 
     watch:
       coffeescript:
@@ -51,5 +52,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-notify'
+  grunt.loadNpmTasks 'grunt-contrib-nodeunit'
   grunt.task.run 'notify_hooks'
   grunt.registerTask 'default', ['notify','coffeelint:all', 'coffee:all', 'watch']
