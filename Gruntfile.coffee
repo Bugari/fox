@@ -5,10 +5,10 @@ module.exports = (grunt) ->
       watch:
         options:
           message: 'Watcher is ready'
-    notify_hooks: 
-      options: 
+    notify_hooks:
+      options:
         enabled: true
-        max_jshint_notifications: 5 
+        max_jshint_notifications: 5
     
     coffee:
       options:
@@ -19,14 +19,14 @@ module.exports = (grunt) ->
         expand: true
         cwd: 'src/'
         src: '**/*.coffee'
-        dest: 'js'
+        dest: 'build'
         ext: '.js'
       modified:
         message: 'modified'
         expand: true
         cwd: 'src/'
         src: '**/*.coffee'
-        dest: 'js'
+        dest: 'build'
         ext: '.js'
 
     coffeelint:
