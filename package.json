@@ -9,6 +9,7 @@
   "dependencies": {
     "lodash": "^2.4.1",
     "ltx": "^0.6.0",
+    "node-stringprep": "^0.6.1",
     "node-xmpp": "^1.0.0-alpha2",
     "node-xmpp-client": "^1.0.0-alpha9",
     "node-xmpp-core": "^1.0.0-alpha8",
@@ -22,6 +23,7 @@
     "grunt-contrib-coffee": "^0.12.0",
     "grunt-contrib-nodeunit": "^0.4.1",
     "grunt-contrib-uglify": "^0.6.0",
+    "grunt-node-inspector": "^0.1.5",
     "grunt-notify": "^0.3.1",
     "node-xmpp-server": "^1.0.0-alpha5"
   },

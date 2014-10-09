@@ -1,6 +1,8 @@
 module.exports = (grunt) ->
 
   grunt.initConfig
+    'node-inspector':
+      dev: {}
     notify:
       watch:
         options:
@@ -53,5 +55,6 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-watch'
   grunt.loadNpmTasks 'grunt-notify'
   grunt.loadNpmTasks 'grunt-contrib-nodeunit'
+  grunt.loadNpmTasks 'grunt-node-inspector'
   grunt.task.run 'notify_hooks'
   grunt.registerTask 'default', ['notify','coffeelint:all', 'coffee:all', 'watch']

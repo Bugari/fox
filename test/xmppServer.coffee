@@ -9,10 +9,10 @@ module.exports =
   startServer: (done) ->
   
     # Sets up the server.
-    c2s = new xmpp.C2SServer(
+    c2s = new xmpp.C2SServer
       port: 5222
       domain: "localhost"
-    )
+    
     
     # On Connect event. When a client connects.
     c2s.on "connect", (client) ->
