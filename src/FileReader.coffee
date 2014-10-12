@@ -7,7 +7,7 @@ class FileReader
       reader = null
       try
         reader = new @ filepath, chunkSize
-        reader.stream.on 'readable', () =>
+        reader.stream.on 'readable', () ->
           good(reader)
       catch err
         bad(err)
