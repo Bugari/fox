@@ -6,21 +6,22 @@ q = require 'q'
 
 module.exports =
   setUp: (callback) ->
-    @test_file = './test/test_file.jpg'
-    @test_file_copy = './test/test_file.jpg~copy'
+    @test_file = './test/test_file.txt'
+    @test_file_copy = './test/test_file.txt~copy'
     callback()
   tearDown: (callback) ->
     callback()
   readWrite: (test) ->
     infileCrcPre = crc.crc32(fs.readFileSync(@test_file, 'base64')).toString 16
     q(0).then () =>
-      FileReader.create(@test_file, 10)
+      FileReader.create(@test_file, 3)
     .then (fileReader) =>
       [fileReader, FileWriter.create(@test_file_copy)]
     .spread (fileReader, fileWriter) ->
       chunk = null
       while (chunk = fileReader.readChunk()) != null
         fileWriter.write chunk
+        #console.log('data', chunk)
       fileWriter.close()
     .then () =>
       infileCrcPost = crc.crc32(fs.readFileSync(@test_file, 'base64')).toString 16
