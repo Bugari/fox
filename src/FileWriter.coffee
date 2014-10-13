@@ -16,8 +16,7 @@ class FileWriter
   constructor: (filepath) ->
     @decoder = base64.decode()
     input = new stream.PassThrough()
-    @_fileOutput = fs.createWriteStream filepath,
-      encoding: 'base64'
+    @_fileOutput = fs.createWriteStream filepath
     input.pipe(@decoder).pipe @_fileOutput
     @stream = input
 
@@ -28,9 +27,7 @@ class FileWriter
     q.Promise (good,bad) =>
       @_fileOutput.on 'finish', () ->
         good()
-      @stream.end null,null, () =>
-        null #for now
-
-
+      @stream.end null,null, () ->
+        null
 module.exports =
   FileWriter: FileWriter
