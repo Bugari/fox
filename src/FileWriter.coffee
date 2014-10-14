@@ -20,7 +20,8 @@ class FileWriter
 
   close: () ->
     q.Promise (good,bad) =>
-      @stream.end null,null, () ->
+      @stream.on 'finish', ->
         good()
+      @stream.end()
 module.exports =
   FileWriter: FileWriter
