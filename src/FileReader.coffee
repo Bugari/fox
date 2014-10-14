@@ -15,7 +15,7 @@ class FileReader
   constructor: (filepath, @chunkSize) ->
     throw new Error('file does not exist') if not fs.existsSync(filepath)
     if @chunkSize%7 != 0
-      console.log 'chunk size must be multiplication of 7 rounding up...'
+      console.log 'chunk size must be multiplication of 7. rounding up...'
       @chunkSize += @chunkSize%7
 
     @leftToRead = fs.statSync(filepath).size
@@ -31,7 +31,6 @@ class FileReader
       @leftToRead = 0
 
     data = data.toString('base64') if data?
-    console.log(data)
     data
 
 module.exports =
