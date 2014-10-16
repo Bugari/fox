@@ -7,7 +7,7 @@
     "test": "test"
   },
   "dependencies": {
-    "lodash": "^2.4.1"
+    "lodash": "^2.4.1",
     "ltx": "^0.6.0",
     "node-stringprep": "^0.6.1",
     "node-xmpp": "^1.0.0-alpha2",
