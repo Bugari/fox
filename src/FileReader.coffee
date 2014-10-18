@@ -1,37 +1,44 @@
 fs = require 'fs'
-q = require 'q'
+Q = require 'q'
 
 class FileReader
   @create: (filepath, chunkSize) ->
-    q.promise (good, bad) =>
-      reader = null
-      try
-        reader = new @ filepath, chunkSize
-        reader.stream.on 'readable', () ->
-          good(reader)
-      catch err
-        bad(err)
+    Q.promise (good, bad) =>
+      if not fs.existsSync(filepath)
+        bad new Error('file does not exist')
+        return
+      fs.open filepath, 'r', (err, fd) =>
+        if err?
+          bad err
+        else
+          good new @ fd, chunkSize
 
-  constructor: (filepath, @chunkSize) ->
-    throw new Error('file does not exist') if not fs.existsSync(filepath)
+  constructor: (@fd, @chunkSize) ->
     if @chunkSize%7 != 0
       console.log 'chunk size must be multiplication of 7. rounding up...'
       @chunkSize += @chunkSize%7
 
-    @leftToRead = fs.statSync(filepath).size
-    @stream = fs.createReadStream filepath
 
-  readChunk: () =>
-    data = @stream.read @chunkSize
-    # if data is null, then it's EOF *or* we don't have that much data left
-    if data?
-      @leftToRead -= @chunkSize
-    else if @leftToRead > 0
-      data = @stream.read @leftToRead
-      @leftToRead = 0
+  close: () ->
+    Q.promise (good, bad) =>
+      fs.close @fd, (err) ->
+        if err?
+          bad(err)
+        else
+          good()
 
-    data = data.toString('base64') if data?
-    data
+  # empty buffer means EOF  
+  readChunk: () ->
+    Q.promise (good, bad) =>
+      fs.read @fd, new Buffer(@chunkSize), 0, @chunkSize, null, (err, bytesRead, buffer) =>
+        if err?
+          bad(err)
+        else
+          @leftToRead -= bytesRead
+          if bytesRead != @chunkSize
+            good buffer.slice(0, bytesRead)
+          else
+            good buffer
 
 module.exports =
   FileReader: FileReader

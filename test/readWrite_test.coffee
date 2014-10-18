@@ -12,11 +12,20 @@ readWrite = (test, testFile, testFileCopy, chunkSize) ->
   .then (fileReader) =>
     [fileReader, FileWriter.create(testFileCopy)]
   .spread (fileReader, fileWriter) ->
-    
-    chunk = null
-    while (chunk = fileReader.readChunk()) != null
-      fileWriter.write chunk
-    fileWriter.close()
+    q.Promise (good, bad) ->
+      read = () ->
+        fileReader.readChunk()
+        .then (chunk) ->
+          if chunk.length > 0
+            fileWriter.write chunk
+            read()
+          else
+            fileWriter.close()
+            .then () -> good()
+            .done()
+        .fail (err) ->
+          bad err
+      read()
   .then () =>
     try
       infileCrcPost = crc.crc32(fs.readFileSync(testFile, 'base64')).toString 16
@@ -28,14 +37,14 @@ readWrite = (test, testFile, testFileCopy, chunkSize) ->
     catch err
       console.log 'err:', err
       test.done()
-
   .then () ->
     test.done()
-  .catch (err) ->
-    fs.unlinkSync(testFileCopy) if fs.exists(@testFileCopy)
+  .fail (err) =>
     test.ok(false, 'We should never get here')
+    fs.unlinkSync(testFileCopy) if fs.exists(@testFileCopy)
     test.done()
   .done()
+ 
 
 module.exports =
   setUp: (callback) ->
@@ -43,13 +52,13 @@ module.exports =
   tearDown: (callback) ->
     callback()
   readWriteBigFileChunkA: (test) ->
-    readWrite test, './test/testFile.jpg', './test/testFile.jpg~copy', 7
+    readWrite test,  __dirname+'/testFile.jpg', __dirname+'/testFile.jpg~copy', 700
   readWriteSmallFileChunkA: (test) ->
-    readWrite test, './test/testFile.txt', './test/testFile.txt~copy', 7
+    readWrite test, __dirname+'/testFile.txt', __dirname+'/testFile.txt~copy', 7 
   readWriteBigFileChunkB: (test) ->
-    readWrite test, './test/testFile.jpg', './test/testFile.jpg~copy', 49
+    readWrite test, __dirname+'/testFile.jpg', __dirname+'/testFile.jpg~copy', 70
   readWriteSmallFileChunkB: (test) ->
-    readWrite test, './test/testFile.txt', './test/testFile.txt~copy', 49
+    readWrite test, __dirname+'/testFile.txt', __dirname+'/testFile.txt~copy', 14
 
 
 
