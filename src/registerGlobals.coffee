@@ -1,7 +1,6 @@
-_ = require('lodash')
-Q = require('q')
-L = require('winston')
+global._ = require('lodash')
+global.Q = require('q')
 
 global._ = _
 global.Q = Q
-global.L = L
+global.Q.longStackSupport = true
