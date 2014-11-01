@@ -1,18 +1,20 @@
+chai = require 'chai'
+chai.should()
+
 {FileReader} = require('../build/FileReader')
 {FileWriter} = require('../build/FileWriter')
 fs = require 'fs'
 crc = require 'crc'
-q = require 'q'
-q.longStackSupport = true
+require('../src/registerGlobals')
 
-readWrite = (test, testFile, testFileCopy, chunkSize) ->
+readWrite = (done, testFile, testFileCopy, chunkSize) ->
   infileCrcPre = crc.crc32(fs.readFileSync(testFile, 'base64')).toString 16
-  q(0).then () =>
+  Q(0).then () ->
     FileReader.create(testFile, chunkSize)
-  .then (fileReader) =>
+  .then (fileReader) ->
     [fileReader, FileWriter.create(testFileCopy)]
   .spread (fileReader, fileWriter) ->
-    q.Promise (good, bad) ->
+    Q.Promise (good, bad) ->
       read = () ->
         fileReader.readChunk()
         .then (chunk) ->
@@ -26,39 +28,29 @@ readWrite = (test, testFile, testFileCopy, chunkSize) ->
         .fail (err) ->
           bad err
       read()
-  .then () =>
-    try
-      infileCrcPost = crc.crc32(fs.readFileSync(testFile, 'base64')).toString 16
-      outfileCrc = crc.crc32(fs.readFileSync(testFileCopy, 'base64')).toString 16
-
-      test.ok infileCrcPre == infileCrcPost, "Input file has changed! crc before: #{infileCrcPre} crc after: #{infileCrcPost}"
-      test.ok infileCrcPost == outfileCrc, "File was modified while transfer crc before: #{infileCrcPost} crc after: #{outfileCrc}"
-      fs.unlinkSync(testFileCopy)  if fs.exists(testFileCopy)
-    catch err
-      console.log 'err:', err
-      test.done()
   .then () ->
-    test.done()
-  .fail (err) =>
-    test.ok(false, 'We should never get here')
-    fs.unlinkSync(testFileCopy) if fs.exists(@testFileCopy)
-    test.done()
+    infileCrcPost = crc.crc32(fs.readFileSync(testFile, 'base64')).toString 16
+    outfileCrc = crc.crc32(fs.readFileSync(testFileCopy, 'base64')).toString 16
+    infileCrcPre.should.equal(infileCrcPost)
+    infileCrcPost.should.equal(outfileCrc)
+    fs.unlinkSync(testFileCopy)  if fs.exists(testFileCopy)
+  .then () ->
+    done()
+  .fail (err) ->
+    done(err)
   .done()
  
-
-module.exports =
-  setUp: (callback) ->
-    callback()
-  tearDown: (callback) ->
-    callback()
-  readWriteBigFileChunkA: (test) ->
-    readWrite test,  __dirname+'/testFile.jpg', __dirname+'/testFile.jpg~copy', 700
-  readWriteSmallFileChunkA: (test) ->
-    readWrite test, __dirname+'/testFile.txt', __dirname+'/testFile.txt~copy', 7 
-  readWriteBigFileChunkB: (test) ->
-    readWrite test, __dirname+'/testFile.jpg', __dirname+'/testFile.jpg~copy', 70
-  readWriteSmallFileChunkB: (test) ->
-    readWrite test, __dirname+'/testFile.txt', __dirname+'/testFile.txt~copy', 14
+describe 'copying files through base64', () ->
+  describe 'big file', () ->
+    it 'should succeed with large chunk', (done) ->
+      readWrite done,  __dirname+'/testFile.jpg', __dirname+'/testFile.jpg~copy', 14000
+    it 'should succeed with small chunk', (done) ->
+      readWrite done,  __dirname+'/testFile.jpg', __dirname+'/testFile.jpg~copy', 700
+  describe 'small file', () ->
+    it 'should succeed with large chunk', (done) ->
+      readWrite done, __dirname+'/testFile.txt', __dirname+'/testFile.txt~copy', 70
+    it 'should succeed with small chunk', (done) ->
+      readWrite done, __dirname+'/testFile.txt', __dirname+'/testFile.txt~copy', 7
 
 
 
