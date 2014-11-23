@@ -3,7 +3,8 @@ exports.createArgv = (params) ->
   require('yargs')
   .usage 'Send or recieve files through XMPP'
   .example '$0 -u myJid@example.com -p passwd -t recipient@example.com ./some_file.txt', 'sends ./some_file.txt to recipient@example.com'
-  .example '$0 -u myJid@example.com -p passwd', 'connects to server and waits for a file to be recieved'
+  .example '$0 -u myJid@example.com -p passwd', 'connects to server and starts in listen mode - waits for a file to be recieved'
+  .example '$0 -u myJid@example.com -p passwd -s downloads/fox', 'connects to server and starts in listen mode - waits for a file to be recieved to directory downloads/fox'
 
   .demand 'u', 'you must provide jid with -u'
   .alias 'u', 'jid'
@@ -16,11 +17,15 @@ exports.createArgv = (params) ->
   .describe 't', 'jid of person that the message should be sent to. Required only when file is provided'
   .alias 't', 'to'
 
+  .describe 's', 'store directory, for downloaded files. Required only when in listen mode'
+  .default 's', 'downloads'
+  .alias 's', 'store'
+
   .check (argv, options) -> # if all JID's are proper
     Utils.testJID(argv.u) and (if argv.t then Utils.testJID(argv.t) else true)
-  .check (argv, options) -> # if has -t should have file specified
-    if argv.t > 0 && _.length != 1
-      false
-
-
+  .check (argv, options) ->
+    if argv.t? && _.length != 1
+      throw new Error('If file name has been provided, -t is required')
+    if argv.s? && _.length != 0
+      throw new Error('If file name has not been provided, -s is required')
 
