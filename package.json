@@ -9,10 +9,11 @@
   "dependencies": {
     "lodash": "^2.4.1",
     "ltx": "^0.6.0",
+    "mkdirp": "^0.5.0",
     "node-stringprep": "^0.6.1",
     "node-uuid": "^1.4.1",
     "node-xmpp": "^1.0.0-alpha2",
-    "node-xmpp-client": "^1.0.0-alpha15",
+    "node-xmpp-client": "^1.0.0-alpha18",
     "node-xmpp-core": "^1.0.0-alpha10",
     "optimist": "^0.6.1",
     "q": "^1.0.1",
