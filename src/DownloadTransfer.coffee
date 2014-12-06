@@ -29,6 +29,10 @@ class DownloadTransfer extends Transfer
     #make sure filename does not contain any weird escape ideas, like '../../etc/passwd' :D
     filename.split('\\').join('/').split('/')[-1..][0]
   
+  _updateLastMsgTime: () ->
+    @lastMsg = new Date()
+
+
   handle: (message) ->
     switch message.type
       when "HLO"
@@ -46,5 +50,6 @@ class DownloadTransfer extends Transfer
     @id = message.id
     @_hlo = message
     @handle message
+    @_updateLastMsgTime()
 
 exports.DownloadTransfer = DownloadTransfer
