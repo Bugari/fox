@@ -1,6 +1,7 @@
 Transfer = require './Transfer'
 FileWriter = require './FileWriter'
 fs = require 'fs'
+uuid = require 'node-uuid'
 
 class DownloadTransfer extends Transfer
   @create: (hloMessage, sendMessage, end) ->
@@ -13,17 +14,18 @@ class DownloadTransfer extends Transfer
           good(@ message, fileWriter, sendMessage, end)
 
   _mkHloAck: () ->
-    hloAck =
+    msg =
+      id: uuid.v4()
+      transferId: @transferId
       time: +new Date()
       type: 'HLOACK'
-      id: @id
 
   _mkDataAck: (msgId) ->
-    dataAck =
-      time: +new Date()
+    msg =
+      id: uuid.v4()
+      transferId: @transferId
+      ackToId: msgId
       type: 'DATAACK'
-      id: @id
-      msgId: msgId
       
   @_sanitizeFilename: (filename) ->
     #make sure filename does not contain any weird escape ideas, like '../../etc/passwd' :D
@@ -32,14 +34,13 @@ class DownloadTransfer extends Transfer
   _updateLastMsgTime: () ->
     @lastMsg = new Date()
 
-
   handle: (message) ->
     switch message.type
       when "HLO"
         @sendMessage _mkHloAck()
       when "DATA"
         @fileWriter message.data
-        @sendMessage _mkDataAck message.msgId
+        @sendMessage _mkDataAck message.id
       when "END"
         @fileWriter.close().fin () ->
           #TODO: validate CRC
@@ -47,7 +48,7 @@ class DownloadTransfer extends Transfer
 
   constructor: (message, @fileWriter, @sendMessage, @end) ->
     @from = message.from
-    @id = message.id
+    @transferId = message.transferId
     @_hlo = message
     @handle message
     @_updateLastMsgTime()
